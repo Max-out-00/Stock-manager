@@ -1,29 +1,27 @@
-import React from 'react';
-import { Chart } from "react-google-charts";
+import label from "daisyui/components/label";
+import React from "react";
+import {Chart} from "react-google-charts";
 
-export default function PriceChart({ prices, labels, symbol }) {
-  const data = [
-    ["Time", "Price"],
-    ...labels.map((time, i) => [time, prices[i]])
-  ];
+// 🔗 How it’s used (IMPORTANT)
+// 📄 Dashboard.jsx
+// <PriceChart
+//   prices={priceData}
+//   labels={timeLabels}
+//   symbol="AAPL"
+// />
 
-  const options = {
-    title: `${symbol} Price Trend`,
-    curveType: "function",
-    legend: { position: "bottom" },
-  };
 
-  
+
+export default function PriceChart(prices , time , symbol){
+
+  const data = [["Time" , "Price"], ...label.map((time,i)=>[time,prices[i]])];
+
   return (
-    <div className="bg-white p-4 rounded shadow">
-      <Chart
-        chartType="LineChart"
-        width="100%"
-        height="400px"
-        data={data}
-        options={options}
-      />
-    </div>
+    <Chart 
+      ChartType = "ColumnChart"
+      width = "100%"
+      height = "400px"
+      data = {data}
+    />
   );
 }
-
