@@ -8,7 +8,7 @@ const Signup = () => {
   const navigate = useNavigate();
 
   async function signup(e) {
-    e.preventDefault();  
+    e.preventDefault();
 
     const url = "http://localhost:5000/register"; // backend register route
 
@@ -27,40 +27,57 @@ const Signup = () => {
 
     if (data.success) {
       alert("Signup successful");
-      navigate("/dashboard");  
+      navigate("/dashboard");
     } else {
       alert(data.message);
     }
   }
 
   return (
-    <form onSubmit={signup}>
-      <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
-        <legend className="fieldset-legend">Signup</legend>
-
-        <label>Email</label>
-        <input
-          type="email"
-          className="input"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-        />
-
-        <label>Password</label>
-        <input
-          type="password"
-          className="input"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-        />
-
-        <button type="submit" className="btn btn-neutral mt-4">
-          Signup
-        </button>
-      </fieldset>
-    </form>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 px-4">
+      <form onSubmit={signup} className="w-full max-w-md">
+        <div className="bg-white shadow-xl rounded-2xl p-8">
+          <h2 className="text-3xl font-bold text-center text-gray-800">
+            Create Account 🚀
+          </h2>
+          <p className="text-center text-gray-500 mt-2">
+            Start managing your stocks today
+          </p>
+          <div className="mt-6 space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email
+              </label>
+              <input
+                type="email"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Password
+              </label>
+              <input
+                type="password"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Create a password"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-200"
+            >
+              Sign Up
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
   );
 };
 

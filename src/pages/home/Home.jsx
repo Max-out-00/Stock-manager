@@ -3,12 +3,30 @@ import { Link } from 'react-router-dom';
 
 const Home = () => {
   return (
-    <div className="p-8 text-center">
-      <h1 className="text-3xl font-bold">Welcome to Stock Manager</h1>
-      <p className="mt-4">
-        Please <Link to="/login" className="link">login</Link> or{' '}
-        <Link to="/signup" className="link">sign up</Link> to continue.
-      </p>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 px-4">
+      <div className="bg-white shadow-xl rounded-2xl p-10 max-w-md w-full text-center">
+        <h1 className="text-4xl font-bold text-gray-800">
+          Welcome to <span className="text-blue-600">Stock Manager</span>
+        </h1>
+        <p className="mt-4 text-gray-600">
+          Track your investments, manage your portfolio,
+          and grow your wealth smarter.
+        </p>
+        <div className="mt-8 flex flex-col gap-4">
+          <Link
+            to="/login"
+            className="btn btn-primary w-full"
+          >
+            Login
+          </Link>
+          <Link
+            to="/signup"
+            className="btn btn-outline btn-primary w-full"
+          >
+            Sign Up
+          </Link>
+        </div>
+      </div>
     </div>
   );
 };

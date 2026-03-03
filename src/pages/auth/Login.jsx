@@ -33,35 +33,50 @@ export default function Login() {
   }
 
   return (
-    <form onSubmit={login}>
-      <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
-        <legend className="fieldset-legend">Login</legend>
-
-        <label className="label">Email</label>
-        <input
-          name="email"
-          type="email"
-          className="input"
-          placeholder="Email"
-          onChange={(e) => setEmail(e.target.value)}
-          value={email}
-        />
-
-        <label className="label">Password</label>
-        <input
-          name="password"
-          type="password"
-          className="input"
-          placeholder="Password"
-          onChange={(e) => setPassword(e.target.value)}
-          value={password}
-        />
-
-        <button type="submit" className="btn btn-neutral mt-4">
-          Login
-        </button>
-      </fieldset>
-    </form>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 px-4">
+      <form onSubmit={login} className="w-full max-w-md">
+        <div className="bg-white shadow-xl rounded-2xl p-8">
+          <h2 className="text-3xl font-bold text-center text-gray-800">
+            Welcome Back
+          </h2>
+          <p className="text-center text-gray-500 mt-2">
+            Login to manage your portfolio
+          </p>
+          <div className="mt-6 space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email
+              </label>
+              <input
+                type="email"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter your email"
+                onChange={(e) => setEmail(e.target.value)}
+                value={email}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Password
+              </label>
+              <input
+                type="password"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter your password"
+                onChange={(e) => setPassword(e.target.value)}
+                value={password}
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-200"
+            >
+              Login
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
   );
 }
 
