@@ -1,28 +1,37 @@
-import { application } from "express";
-import { React, useState } from "react";
-
-
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
-  
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   async function login(e) {
     e.preventDefault();
-    const url = "http://localhost:3000/login"
-    const respond = await fetch(url, {
+    const url = "http://localhost:5000/login"; // backend port
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify{
+      body: JSON.stringify({
         email,
         password
+      })
+    });
+    const data = await response.json();
+
+    if (data.success) {
+      localStorage.setItem("token", data.token);
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
       }
-    })
+      navigate("/dashboard");
+    } else {
+      alert(data.message);
+    }
   }
 
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   return (
     <form onSubmit={login}>
       <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
@@ -55,5 +64,4 @@ export default function Login() {
     </form>
   );
 }
-
 

@@ -1,5 +1,5 @@
 // Authentication service API calls
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'; // backend port (no /api prefix in current server)
 
 export const authService = {
   async login(email, password) {
