@@ -15,6 +15,9 @@ const Dashboard = () => {
   // grab logged-in user from context so we can associate the entry
   const { user } = useContext(AuthContext);
 
+
+  //-==-==-==-=-==-=-=-=-=-=-=-=-=-=-===-=-=- Handling stockes=----------------------------------------
+  
   async function handleSubmit(e) {
     e.preventDefault();
 

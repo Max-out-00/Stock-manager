@@ -1,6 +1,19 @@
 import React from 'react'
+import { Navigate, useNavigate } from "react-router-dom";
+
 
 const Sidebar = () => {
+    const navigate = useNavigate();
+    const handleNav = (choice) => {
+        switch (choice) {
+            case 1:
+                navigate('/dashboard');
+                break;
+            case 2:
+                navigate('/portfolio');
+                break;
+            }
+    }
     return (
         <div className="drawer">
             <input id="my-drawer-1" type="checkbox" className="drawer-toggle" />
@@ -13,11 +26,11 @@ const Sidebar = () => {
                 <label htmlFor="my-drawer-1" aria-label="close sidebar" className="drawer-overlay"></label>
                 <ul className="menu bg-base-200 min-h-full w-80 p-4">
                     {/* Sidebar content here */}
-                    <li><a>Dashboard</a></li>
-                    <li><a>Portfolio</a></li>
-                    <li><a>Prediction</a></li>
-                    <li><a>Report</a></li>
-                    <li><a>Setting</a></li>
+                    <li><button className="btn btn-ghost w-full justify-start" onClick={() => handleNav(1)}>Dashboard</button></li>
+                    <li><button className="btn btn-ghost w-full justify-start" onClick={() => handleNav(2)}>Portfolio</button></li>
+                    <li><button className="btn btn-ghost w-full justify-start">Prediction</button></li>
+                    <li><button className="btn btn-ghost w-full justify-start">Report</button></li>
+                    <li><button className="btn btn-ghost w-full justify-start">Setting</button></li>
                 </ul>
             </div>
         </div>

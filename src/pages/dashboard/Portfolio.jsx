@@ -1,8 +1,11 @@
 import React from 'react';
+import Navbar from '../../components/common/Navbar';
+
 
 const Portfolio = () => {
   return (
     <div>
+      <Navbar />  
       {/*------------------------------------------ List of stocks buyed ------------------------------------------------------------*/}
       <div className="overflow-x-auto">
         <table className="table">

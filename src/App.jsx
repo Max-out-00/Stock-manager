@@ -6,6 +6,7 @@ import Home from './pages/home/Home';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 import Dashboard from './pages/dashboard/Dashboard';
+import Portfolio from './pages/dashboard/Portfolio';
 import Profile from './pages/profile/Profile';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
@@ -30,6 +31,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/portfolio"
+            element={
+              <ProtectedRoute>
+                <Portfolio />
               </ProtectedRoute>
             }
           />

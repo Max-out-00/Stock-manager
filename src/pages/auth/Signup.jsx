@@ -38,7 +38,7 @@ const Signup = () => {
       <form onSubmit={signup} className="w-full max-w-md">
         <div className="bg-white shadow-xl rounded-2xl p-8">
           <h2 className="text-3xl font-bold text-center text-gray-800">
-            Create Account 🚀
+            Create Account 
           </h2>
           <p className="text-center text-gray-500 mt-2">
             Start managing your stocks today
