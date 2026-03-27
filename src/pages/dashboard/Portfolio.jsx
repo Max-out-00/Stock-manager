@@ -1,45 +1,53 @@
-import React from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import Navbar from '../../components/common/Navbar';
-
+import { AuthContext } from '../../context/AuthContext';
 
 const Portfolio = () => {
+  const [userData, setUserData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useContext(AuthContext);
+
+  useEffect(() => {
+    if (!user?._id) {
+      return;
+
+    }
+
+    fetch(`/api/userData/${user._id}`) // Use the backend API endpoint
+      .then(response => response.json())
+      .then(data => {
+        setUserData(data);
+        setLoading(false);
+      });
+  }, [user?._id]);
+
+  if (loading) {
+    return <p>Loading data...</p>;
+  }
   return (
     <div>
-      <Navbar />  
+      <Navbar />
       {/*------------------------------------------ List of stocks buyed ------------------------------------------------------------*/}
       <div className="overflow-x-auto">
         <table className="table">
           {/* head */}
-          <thead>
+          <thead className='text-black'>
             <tr>
-              <th></th>
-              <th>Name</th>
-              <th>Job</th>
-              <th>Favorite Color</th>
+              <th>S.No.</th>
+              <th>Stock</th>
+              <th>Money</th>
+              <th>Shares</th>
             </tr>
           </thead>
           <tbody>
-            {/* row 1 */}
-            <tr>
-              <th>1</th>
-              <td>Cy Ganderton</td>
-              <td>Quality Control Specialist</td>
-              <td>Blue</td>
-            </tr>
-            {/* row 2 */}
-            <tr className="hover:bg-base-300">
-              <th>2</th>
-              <td>Hart Hagerty</td>
-              <td>Desktop Support Technician</td>
-              <td>Purple</td>
-            </tr>
-            {/* row 3 */}
-            <tr>
-              <th>3</th>
-              <td>Brice Swyre</td>
-              <td>Tax Accountant</td>
-              <td>Red</td>
-            </tr>
+            {userData.map((item, index) => (
+              <tr key={index}>
+                <th>{index + 1}</th>
+                <td>{item.stock}</td>
+                <td>{item.money}</td>
+                <td>{item.share}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

@@ -13,13 +13,13 @@ const { users: usersCollection, stocks: stocksCollection } = await connectDB();
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= register -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 app.post("/register", async (req, res) => {
-  const { email , password } = req.body;
+  const { email, password } = req.body;
 
   const existing = await usersCollection.findOne({ email });
 
   if (!existing) {
-      await usersCollection.insertOne({ email, password });
-      return res.json({ success: true, message: "User added" });
+    await usersCollection.insertOne({ email, password });
+    return res.json({ success: true, message: "User added" });
   }
 
   res.json({ success: false, message: "User already exists" });
@@ -66,4 +66,17 @@ app.post("/dashboard", async (req, res) => {
 
 app.listen(5000, () => {
   console.log("Server running on port 5000");
+});
+
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Get stocks for user -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+app.get("/api/userData/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const data = await stocksCollection.find({ userId }).toArray();
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server error');
+  }
 });
