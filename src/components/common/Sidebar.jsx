@@ -1,7 +1,6 @@
 import React from 'react'
 import { Navigate, useNavigate } from "react-router-dom";
 
-
 const Sidebar = () => {
     const navigate = useNavigate();
     const handleNav = (choice) => {
@@ -11,6 +10,9 @@ const Sidebar = () => {
                 break;
             case 2:
                 navigate('/portfolio');
+                break;
+            case 3:
+                navigate('/predictions');
                 break;
             }
     }
@@ -28,9 +30,7 @@ const Sidebar = () => {
                     {/* Sidebar content here */}
                     <li><button className="btn btn-ghost w-full justify-start" onClick={() => handleNav(1)}>Dashboard</button></li>
                     <li><button className="btn btn-ghost w-full justify-start" onClick={() => handleNav(2)}>Portfolio</button></li>
-                    <li><button className="btn btn-ghost w-full justify-start">Prediction</button></li>
-                    <li><button className="btn btn-ghost w-full justify-start">Report</button></li>
-                    <li><button className="btn btn-ghost w-full justify-start">Setting</button></li>
+                    <li><button className="btn btn-ghost w-full justify-start" onClick={() => handleNav(3)}>Predictions</button></li>
                 </ul>
             </div>
         </div>

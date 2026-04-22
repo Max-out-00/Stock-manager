@@ -3,111 +3,171 @@ import Navbar from '../../components/common/Navbar';
 import PriceChart from '../../components/charts/PriceChart';
 import VolumeChart from '../../components/charts/VolumeChart';
 import { AuthContext } from '../../context/AuthContext';
+import { getStockInfo } from '../../services/stockService';
+import { API_BASE_URL, STOCK_LIST } from '../../utils/constants';
+
 
 const Dashboard = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [stockDetails, setStockDetails] = useState(null);
+  const [quantity, setQuantity] = useState('1');
+  const [loadingQuote, setLoadingQuote] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const totalValue = stockDetails ? (stockDetails.price * Number(quantity || '0')).toFixed(2) : '0.00';
 
-  const url = "http://localhost:5000/dashboard";
-
-  const [stock, setStock] = useState("");
-  const [money, setMoney] = useState("");
-  const [share, setShare] = useState("");
-
-  // grab logged-in user from context so we can associate the entry
   const { user } = useContext(AuthContext);
 
-
-  //-==-==-==-=-==-=-=-=-=-=-=-=-=-=-===-=-=- Handling stockes=----------------------------------------
-  
-  async function handleSubmit(e) {
-    e.preventDefault();
-
-    if (!stock || !money || !share) {
-      alert("Please fill all fields");
+  const handleFetchQuote = async () => {
+    const symbol = searchTerm?.trim().toUpperCase();
+    if (!symbol) {
+      alert('Please enter a stock symbol');
       return;
     }
 
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        stock,
-        money,
-        share,
-        userId: user?._id
-      })
-    });
+    setLoadingQuote(true);
+    try {
+      const result = await getStockInfo(symbol);
 
-    const data = await response.json();
-
-    if (data.success) {
-      alert("Add successful");
-
-      // clear fields
-      setStock("");
-      setMoney("");
-      setShare("");
-    } else {
-      alert(data.message);
+      if (!result.success) {
+        throw new Error(result.message || 'Unable to load stock quote');
+      }
+      setStockDetails(result.data);
+      setQuantity('1');
+    } catch (error) {
+      alert(error.message);
+      setStockDetails(null);
+    } finally {
+      setLoadingQuote(false);
     }
-  }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!stockDetails) {
+      alert('Please search and select a stock first');
+      return;
+    }
+
+    if (!quantity || Number(quantity) <= 0) {
+      alert('Please enter a valid quantity');
+      return;
+    }
+
+    const total = Number((stockDetails.price * Number(quantity)).toFixed(2));
+    setSubmitting(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/dashboard`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          stock: stockDetails,
+          quantity: Number(quantity),
+          total,
+          userId: user?._id,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        alert('Stock added successfully');
+        setSearchTerm('');
+        setStockDetails(null);
+        setQuantity('1');
+      } else {
+        alert(data.message || 'Failed to add stock');
+      }
+    } catch (error) {
+      alert(error.message || 'Failed to add stock');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <>
       <Navbar />
-      <div className="flex flex-col items-center justify-center min-h-screen ">
+      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        <div className="w-full max-w-4xl bg-white border border-base-300 rounded-box p-6 shadow-md">
+          <h2 className="text-2xl font-semibold mb-4">Search and Add Stock</h2>
 
-        <form
-          className="flex flex-row items-end gap-4 bg-white border border-base-300 rounded-box p-6 shadow-md w-around m-2.5 justify-center"
-          onSubmit={handleSubmit}
-        >
-          <div className="flex flex-col">
-            <label className="label">Stock</label>
-            <input
-              type="text"
-              className="input bg-white border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Which Stock"
-              value={stock}
-              onChange={(e) => setStock(e.target.value)}
-              required
-            />
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="flex flex-col">
+              <label className="label">Search symbol</label>
+              <input
+                list="stockSymbols"
+                type="text"
+                className="input bg-white border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter stock symbol e.g. AAPL"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <datalist id="stockSymbols">
+                {STOCK_LIST.map((item) => (
+                  <option key={item.symbol} value={item.symbol}>
+                    {item.name}
+                  </option>
+                ))}
+              </datalist>
+            </div>
+
+            <div className="flex items-end">
+              <button
+                type="button"
+                className="btn btn-primary w-full"
+                onClick={handleFetchQuote}
+                disabled={loadingQuote}
+              >
+                {loadingQuote ? 'Loading...' : 'Fetch Stock'}
+              </button>
+            </div>
           </div>
 
-          <div className="flex flex-col">
-            <label className="label">Money</label>
-            <input
-              type="number"
-              className="input bg-white border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Money Invested"
-              value={money}
-              onChange={(e) => setMoney(e.target.value)}
-              required
-            />
-          </div>
+          {stockDetails && (
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <div className="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 className="text-lg font-semibold">{stockDetails.name || stockDetails.symbol}</h3>
+                <p><strong>Symbol:</strong> {stockDetails.symbol}</p>
+                <p><strong>Price:</strong> ${stockDetails.price?.toFixed(2)}</p>
+                <p><strong>Change:</strong> {stockDetails.change?.toFixed(2)} ({stockDetails.changePercentage?.toFixed(2)}%)</p>
+                <p><strong>Exchange:</strong> {stockDetails.exchange || 'N/A'}</p>
+              </div>
 
-          <div className="flex flex-col">
-            <label className="label">Share</label>
-            <input
-              type="number"
-              className="input bg-white border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="How Many Shares"
-              value={share}
-              onChange={(e) => setShare(e.target.value)}
-              required
-            />
-          </div>
-
-          <button className="btn btn-neutral h-10" type="submit">
-            ADD
-          </button>
-        </form>
+              <form className="space-y-4" onSubmit={(e) => handleSubmit(e)}>
+                <div className="flex flex-col">
+                  <label className="label">Quantity</label>
+                  <input
+                    type="number"
+                    min="1"
+                    className="input bg-white border border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={quantity}
+                    onChange={(e) => setQuantity(e.target.value)}
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label className="label">Total investment</label>
+                  <input
+                    type="text"
+                    className="input bg-gray-100 border border-gray-300"
+                    value={`$${totalValue}`}
+                    readOnly
+                  />
+                </div>
+                <button className="btn btn-success w-full" type="submit" disabled={submitting}>
+                  {submitting ? 'Adding...' : 'Add to Portfolio'}
+                </button>
+              </form>
+            </div>
+          )}
+        </div>
 
         <div className="chart mt-10 w-full max-w-5xl">
           <PriceChart />
           <VolumeChart />
         </div>
-
       </div>
     </>
   );

@@ -2,6 +2,7 @@ import express from "express";
 import connectDB from "./db.js";
 import jwt from "jsonwebtoken";
 import cors from "cors";
+import { ObjectId } from "mongodb";
 
 const app = express();
 app.use(express.json());
@@ -51,32 +52,101 @@ app.post("/login", async (req, res) => {
 
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Add stock -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 app.post("/dashboard", async (req, res) => {
-  const { stock, money, share, userId } = req.body;
+  try {
+    const { stock, quantity, total, userId } = req.body;
 
-  await stocksCollection.insertOne({
-    userId,
-    stock,
-    money,
-    share,
-    date: new Date()
-  });
+    if (!stock || !userId || !quantity || !total) {
+      return res.status(400).json({ success: false, message: 'Missing required stock data.' });
+    }
 
-  res.json({ success: true });
+    await stocksCollection.insertOne({
+      userId,
+      stock,
+      quantity,
+      total,
+      createdAt: new Date(),
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Dashboard save error:', error);
+    res.status(500).json({ success: false, message: 'Unable to save stock data.' });
+  }
+});
+
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Get user portfolio -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+app.get("/api/userData/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({ success: false, message: 'User ID is required.' });
+    }
+
+    const userStocks = await stocksCollection.find({ userId }).toArray();
+
+    res.json(userStocks);
+  } catch (error) {
+    console.error('Portfolio fetch error:', error);
+    res.status(500).json({ success: false, message: 'Unable to fetch portfolio data.' });
+  }
+});
+
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Sell stock -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+app.post("/api/sellStock", async (req, res) => {
+  try {
+    const { userId, quantity, stockId } = req.body;
+
+    if (!userId || !quantity) {
+      return res.status(400).json({ success: false, message: 'Missing required data.' });
+    }
+
+    // Find the specific stock to sell
+    let userStock;
+    if (stockId) {
+      // If stockId is provided, use it
+      userStock = await stocksCollection.findOne({ _id: new ObjectId(stockId), userId });
+    } else {
+      // Otherwise get the first stock for this user
+      userStock = await stocksCollection.findOne({ userId });
+    }
+
+    if (!userStock) {
+      return res.status(404).json({ success: false, message: 'No stock found to sell.' });
+    }
+
+    const remainingQuantity = userStock.quantity - quantity;
+
+    if (remainingQuantity < 0) {
+      return res.status(400).json({ success: false, message: 'Cannot sell more shares than owned.' });
+    }
+
+    if (remainingQuantity === 0) {
+      // Delete the stock entry if all shares are sold
+      await stocksCollection.deleteOne({ _id: new ObjectId(userStock._id) });
+    } else {
+      // Update quantity and total
+      const newTotal = (userStock.stock.price * remainingQuantity).toFixed(2);
+      await stocksCollection.updateOne(
+        { _id: new ObjectId(userStock._id) },
+        {
+          $set: {
+            quantity: remainingQuantity,
+            total: newTotal,
+            updatedAt: new Date(),
+          }
+        }
+      );
+    }
+
+    res.json({ success: true, message: 'Stock sold successfully.' });
+  } catch (error) {
+    console.error('Sell stock error:', error);
+    res.status(500).json({ success: false, message: 'Unable to sell stock.' });
+  }
 });
 
 app.listen(5000, () => {
   console.log("Server running on port 5000");
 });
 
-//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= Get stocks for user -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-app.get("/api/userData/:userId", async (req, res) => {
-  try {
-    const userId = req.params.userId;
-    const data = await stocksCollection.find({ userId }).toArray();
-    res.json(data);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Server error');
-  }
-});

@@ -8,6 +8,7 @@ import Signup from './pages/auth/Signup';
 import Dashboard from './pages/dashboard/Dashboard';
 import Portfolio from './pages/dashboard/Portfolio';
 import Profile from './pages/profile/Profile';
+import Predictions from './pages/predictions/Predictions';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
 function App() {
@@ -23,6 +24,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/predictions"
+            element={
+              <ProtectedRoute>
+                <Predictions />
               </ProtectedRoute>
             }
           />
@@ -49,3 +58,4 @@ function App() {
 }
 
 export default App;
+
