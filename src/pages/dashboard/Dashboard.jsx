@@ -3,7 +3,7 @@ import Navbar from '../../components/common/Navbar';
 import PriceChart from '../../components/charts/PriceChart';
 import VolumeChart from '../../components/charts/VolumeChart';
 import { AuthContext } from '../../context/AuthContext';
-import { getStockInfo } from '../../services/stockService';
+import { getStockInfo, getHistoricalData } from '../../services/stockService';
 import { API_BASE_URL, STOCK_LIST } from '../../utils/constants';
 
 
@@ -13,6 +13,9 @@ const Dashboard = () => {
   const [quantity, setQuantity] = useState('1');
   const [loadingQuote, setLoadingQuote] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [chartData, setChartData] = useState({ prices: [], volumes: [], labels: [] });
+  const [chartLoading, setChartLoading] = useState(false);
+  const [chartError, setChartError] = useState(null);
   const totalValue = stockDetails ? (stockDetails.price * Number(quantity || '0')).toFixed(2) : '0.00';
 
   const { user } = useContext(AuthContext);
@@ -25,6 +28,9 @@ const Dashboard = () => {
     }
 
     setLoadingQuote(true);
+    setChartLoading(true);
+    setChartError(null);
+    
     try {
       const result = await getStockInfo(symbol);
 
@@ -33,18 +39,34 @@ const Dashboard = () => {
       }
       setStockDetails(result.data);
       setQuantity('1');
+
+      // Fetch historical data for charts
+      const historicalResult = await getHistoricalData(symbol, 30);
+      if (historicalResult && historicalResult.success && historicalResult.data) {
+        const safeData = {
+          prices: Array.isArray(historicalResult.data.prices) ? historicalResult.data.prices : [],
+          volumes: Array.isArray(historicalResult.data.volumes) ? historicalResult.data.volumes : [],
+          labels: Array.isArray(historicalResult.data.labels) ? historicalResult.data.labels : [],
+        };
+        setChartData(safeData);
+      } else {
+        setChartError(historicalResult?.message || 'Unable to load chart data');
+        setChartData({ prices: [], volumes: [], labels: [] });
+      }
     } catch (error) {
       alert(error.message);
       setStockDetails(null);
+      setChartData({ prices: [], volumes: [], labels: [] });
     } finally {
       setLoadingQuote(false);
+      setChartLoading(false);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!stockDetails) {
+    if (!stockDetails || !stockDetails.symbol) {
       alert('Please search and select a stock first');
       return;
     }
@@ -54,7 +76,13 @@ const Dashboard = () => {
       return;
     }
 
-    const total = Number((stockDetails.price * Number(quantity)).toFixed(2));
+    const price = Number(stockDetails.price) || 0;
+    if (price === 0) {
+      alert('Invalid stock price');
+      return;
+    }
+
+    const total = Number((price * Number(quantity)).toFixed(2));
     setSubmitting(true);
 
     try {
@@ -126,14 +154,14 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {stockDetails && (
+          {stockDetails && stockDetails.symbol && (
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <div className="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <h3 className="text-lg font-semibold">{stockDetails.name || stockDetails.symbol}</h3>
-                <p><strong>Symbol:</strong> {stockDetails.symbol}</p>
-                <p><strong>Price:</strong> ${stockDetails.price?.toFixed(2)}</p>
-                <p><strong>Change:</strong> {stockDetails.change?.toFixed(2)} ({stockDetails.changePercentage?.toFixed(2)}%)</p>
-                <p><strong>Exchange:</strong> {stockDetails.exchange || 'N/A'}</p>
+                <h3 className="text-lg font-semibold">{stockDetails?.name || stockDetails?.symbol || 'Stock'}</h3>
+                <p><strong>Symbol:</strong> {stockDetails?.symbol || 'N/A'}</p>
+                <p><strong>Price:</strong> ${Number(stockDetails?.price || 0).toFixed(2)}</p>
+                <p><strong>Change:</strong> {Number(stockDetails?.change || 0).toFixed(2)} ({Number(stockDetails?.changePercentage || 0).toFixed(2)}%)</p>
+                <p><strong>Exchange:</strong> {stockDetails?.exchange || 'N/A'}</p>
               </div>
 
               <form className="space-y-4" onSubmit={(e) => handleSubmit(e)}>
@@ -164,9 +192,21 @@ const Dashboard = () => {
           )}
         </div>
 
-        <div className="chart mt-10 w-full max-w-5xl">
-          <PriceChart />
-          <VolumeChart />
+        <div className="chart mt-10 w-full max-w-5xl space-y-8">
+          <PriceChart
+            prices={chartData.prices}
+            labels={chartData.labels}
+            symbol={stockDetails?.symbol}
+            loading={chartLoading}
+            error={chartError}
+          />
+          <VolumeChart
+            volumes={chartData.volumes}
+            labels={chartData.labels}
+            symbol={stockDetails?.symbol}
+            loading={chartLoading}
+            error={chartError}
+          />
         </div>
       </div>
     </>

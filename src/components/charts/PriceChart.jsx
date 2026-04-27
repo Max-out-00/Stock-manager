@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import { Chart } from "react-google-charts";
 
 // 🔗 Usage
@@ -12,6 +12,15 @@ export default function PriceChart({
   error = null,
   showLineChart = false 
 }) {
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    // Ensure google charts is loaded
+    if (typeof window !== 'undefined' && window.google) {
+      setIsReady(true);
+    }
+  }, []);
+
   const data = useMemo(() => {
     if (!prices.length || !labels.length) {
       return [["Time", "Price"]];
@@ -90,13 +99,20 @@ export default function PriceChart({
 
   return (
     <div className="w-full bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-      <Chart
-        chartType={showLineChart ? "LineChart" : "AreaChart"}
-        width="100%"
-        height="400px"
-        data={data}
-        options={options}
-      />
+      {isReady ? (
+        <Chart
+          chartType={showLineChart ? "LineChart" : "AreaChart"}
+          width="100%"
+          height="400px"
+          data={data}
+          options={options}
+          loader={<div className="text-center py-8">Loading chart...</div>}
+        />
+      ) : (
+        <div className="text-center py-8 text-gray-600">
+          Initializing chart...
+        </div>
+      )}
     </div>
   );
-} 
+}
