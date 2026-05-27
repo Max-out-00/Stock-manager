@@ -4,12 +4,12 @@ import BuySell from './BuySell';
 import { AuthContext } from '../../context/AuthContext';
 import { API_BASE_URL } from '../../utils/constants';
 
-const Portfolio = () => {
+const Portfolio = ({ showNavbar = true }) => {
   const [userData, setUserData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedStock, setSelectedStock] = useState(null);
-  const [transactionMode, setTransactionMode] = useState('buy'); // 'buy' or 'sell'
+  const [transactionMode, setTransactionMode] = useState('buy'); 
   const { user } = useContext(AuthContext);
 
   const fetchPortfolioData = () => {
@@ -30,7 +30,6 @@ const Portfolio = () => {
 
   useEffect(() => {
     fetchPortfolioData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?._id]);
 
   const handleBuy = (item) => {
@@ -60,7 +59,7 @@ const Portfolio = () => {
 
   return (
     <div>
-      <Navbar />
+      {showNavbar && <Navbar />}
       <div className="min-h-screen w-full bg-gradient-to-br from-gray-100 to-gray-200 p-6">
         <div className="w-full h-full bg-white shadow-2xl rounded-2xl p-6">
           <h2 className="text-3xl font-bold text-gray-800 mb-6">Your Stock Portfolio</h2>

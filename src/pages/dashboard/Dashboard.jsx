@@ -1,9 +1,8 @@
 import React, { useState, useContext } from 'react';
 import Navbar from '../../components/common/Navbar';
-import PriceChart from '../../components/charts/PriceChart';
-import VolumeChart from '../../components/charts/VolumeChart';
+import Portfolio from './Portfolio';
 import { AuthContext } from '../../context/AuthContext';
-import { getStockInfo, getHistoricalData } from '../../services/stockService';
+import { getStockInfo } from '../../services/stockService';
 import { API_BASE_URL, STOCK_LIST } from '../../utils/constants';
 
 
@@ -13,9 +12,6 @@ const Dashboard = () => {
   const [quantity, setQuantity] = useState('1');
   const [loadingQuote, setLoadingQuote] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [chartData, setChartData] = useState({ prices: [], volumes: [], labels: [] });
-  const [chartLoading, setChartLoading] = useState(false);
-  const [chartError, setChartError] = useState(null);
   const totalValue = stockDetails ? (stockDetails.price * Number(quantity || '0')).toFixed(2) : '0.00';
 
   const { user } = useContext(AuthContext);
@@ -28,9 +24,7 @@ const Dashboard = () => {
     }
 
     setLoadingQuote(true);
-    setChartLoading(true);
-    setChartError(null);
-    
+
     try {
       const result = await getStockInfo(symbol);
 
@@ -39,27 +33,11 @@ const Dashboard = () => {
       }
       setStockDetails(result.data);
       setQuantity('1');
-
-      // Fetch historical data for charts
-      const historicalResult = await getHistoricalData(symbol, 30);
-      if (historicalResult && historicalResult.success && historicalResult.data) {
-        const safeData = {
-          prices: Array.isArray(historicalResult.data.prices) ? historicalResult.data.prices : [],
-          volumes: Array.isArray(historicalResult.data.volumes) ? historicalResult.data.volumes : [],
-          labels: Array.isArray(historicalResult.data.labels) ? historicalResult.data.labels : [],
-        };
-        setChartData(safeData);
-      } else {
-        setChartError(historicalResult?.message || 'Unable to load chart data');
-        setChartData({ prices: [], volumes: [], labels: [] });
-      }
     } catch (error) {
       alert(error.message);
       setStockDetails(null);
-      setChartData({ prices: [], volumes: [], labels: [] });
     } finally {
       setLoadingQuote(false);
-      setChartLoading(false);
     }
   };
 
@@ -192,21 +170,8 @@ const Dashboard = () => {
           )}
         </div>
 
-        <div className="chart mt-10 w-full max-w-5xl space-y-8">
-          <PriceChart
-            prices={chartData.prices}
-            labels={chartData.labels}
-            symbol={stockDetails?.symbol}
-            loading={chartLoading}
-            error={chartError}
-          />
-          <VolumeChart
-            volumes={chartData.volumes}
-            labels={chartData.labels}
-            symbol={stockDetails?.symbol}
-            loading={chartLoading}
-            error={chartError}
-          />
+        <div className="mt-10 w-full max-w-5xl">
+          <Portfolio showNavbar={false} />
         </div>
       </div>
     </>
