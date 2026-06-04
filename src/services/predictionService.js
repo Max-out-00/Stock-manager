@@ -11,7 +11,7 @@ import {
 export const predictionService = {
   async getStockHistory(symbol, timeframe = '1m') {
     try {
-      // For MVP, we'll use a simplified approach
+
       // In production, you'd want to use a proper historical data API
       const currentData = await getStockInfo(symbol);
 
@@ -19,8 +19,7 @@ export const predictionService = {
         return { success: false, message: currentData.message };
       }
 
-      // Generate mock historical data based on current price
-      // This is a simplified approach for MVP
+      // Generate mock historical data based on current price and timeframe
       const basePrice = currentData.data.price;
       const historicalPrices = this.generateMockHistoricalData(basePrice, timeframe);
 

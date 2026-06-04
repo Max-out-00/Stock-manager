@@ -12,16 +12,16 @@ const Home = () => {
           Track your investments, manage your portfolio,
           and grow your wealth smarter.
         </p>
-        <div className="mt-8 flex flex-col gap-4">
+        <div className="mt-8 flex flex-col gap-4 rounded-r-4xl">
           <Link
             to="/login"
-            className="btn btn-primary w-full"
+            className="btn btn-primary w-full btn-circle"
           >
             Login
           </Link>
           <Link
             to="/signup"
-            className="btn btn-outline btn-primary w-full"
+            className="btn btn-outline btn-primary w-full btn-circle"
           >
             Sign Up
           </Link>

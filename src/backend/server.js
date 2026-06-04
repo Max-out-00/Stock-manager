@@ -19,8 +19,15 @@ app.post("/register", async (req, res) => {
   const existing = await usersCollection.findOne({ email });
 
   if (!existing) {
-    await usersCollection.insertOne({ email, password });
-    return res.json({ success: true, message: "User added" });
+    const result = await usersCollection.insertOne({ email, password });
+    const newUser = { _id: result.insertedId, email };
+    const token = jwt.sign(
+      { userId: result.insertedId },
+      "mySecretKey",
+      { expiresIn: "1h" }
+    );
+
+    return res.json({ success: true, message: "User added", token, user: newUser });
   }
 
   res.json({ success: false, message: "User already exists" });
